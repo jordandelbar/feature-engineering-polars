@@ -1,5 +1,13 @@
-name: Unit Tests
-on: push
+name: Unit tests
+on:
+  pull_request:
+    branches:
+      - dev
+      - main
+  workflow_dispatch:
+    branches:
+      - dev
+      - main
 
 jobs:
   ci:
