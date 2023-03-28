@@ -1,10 +1,10 @@
 [tool.black]
-line-length = 120
+line-length = 88
 target-version = ['py310']
 include = '\.pyi?$'
 
 [tool.ruff]
-line-length = 120
+line-length = 88
 fix = true
 select = ["D", "E", "F", "I", "N"]
 ignore = ["D104", "D105", "N803", "N806"]

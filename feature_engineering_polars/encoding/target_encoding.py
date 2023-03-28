@@ -25,7 +25,9 @@ class TargetEncoder:
         self.global_mean = None
         self.mapping = dict()
 
-    def fit(self, x: polars.DataFrame, y: Union[polars.Series, polars.DataFrame]) -> None:
+    def fit(
+        self, x: polars.DataFrame, y: Union[polars.Series, polars.DataFrame]
+    ) -> None:
         """Fit the target encoder.
 
         Args:
@@ -38,7 +40,7 @@ class TargetEncoder:
         if isinstance(y, polars.DataFrame):
             on = y.columns[0]
         else:
-            on = y.absname
+            on = y.name
 
         x = x.with_columns(y)
 
@@ -59,7 +61,9 @@ class TargetEncoder:
             )
             # Compute the smoothed mean
             smooth = agg.with_columns(
-                encoding=(polars.col("count") * polars.col("mean") + self.smoothing * mean)
+                encoding=(
+                    polars.col("count") * polars.col("mean") + self.smoothing * mean
+                )
                 / (polars.col("count") + self.smoothing)
             ).select([polars.col(feature), polars.col("encoding")])
             self.mapping[feature] = {
@@ -80,19 +84,27 @@ class TargetEncoder:
         features_with_unseen = list()
         for feature in self.mapping.keys():
             mapping_table = polars.from_dict(self.mapping[feature]["table"])
-            mapping_table = mapping_table.with_columns(polars.col(feature).cast(self.mapping[feature]["dtype"]))
+            mapping_table = mapping_table.with_columns(
+                polars.col(feature).cast(self.mapping[feature]["dtype"])
+            )
             temp = x.join(mapping_table, on=feature, how="left")
             x = temp.replace(feature, temp["encoding"]).select(x.columns)
             # Handling of unseen data
             if x[feature].is_null().any():
                 features_with_unseen.append(feature)
-                x = x.with_columns(polars.col(feature).fill_null(self.global_mean).alias(feature))
+                x = x.with_columns(
+                    polars.col(feature).fill_null(self.global_mean).alias(feature)
+                )
         if features_with_unseen:
             logger = logging.getLogger(__name__)
-            logger.debug(f"Feature(s) {features_with_unseen} has unseen values, defaults to global mean")
+            logger.warning(
+                f"Feature(s) {features_with_unseen} has unseen values, defaults to global mean"  # noqa: E501
+            )
         return x
 
-    def fit_transform(self, x: polars.DataFrame, y: Union[polars.Series, polars.DataFrame]) -> polars.DataFrame:
+    def fit_transform(
+        self, x: polars.DataFrame, y: Union[polars.Series, polars.DataFrame]
+    ) -> polars.DataFrame:
         """Fit and apply the mapping to the provided dataframe.
 
         Args:
