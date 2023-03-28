@@ -3,7 +3,7 @@
 Mean imputation is a method of handling missing data by replacing missing values
 with the mean value of the entire feature.
 """
-from typing import List
+from typing import List, Union
 
 import polars
 
@@ -11,7 +11,7 @@ import polars
 class MeanImputer:
     """Mean imputer class."""
 
-    def __init__(self, features_to_impute: str | List):
+    def __init__(self, features_to_impute: Union[str, List]):
         """Init.
 
         Args:
