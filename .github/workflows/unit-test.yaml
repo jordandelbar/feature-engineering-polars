@@ -1,6 +1,8 @@
 name: Unit tests
 on:
   pull_request:
+    paths:
+      - "**.py"
     branches:
       - dev
       - main
