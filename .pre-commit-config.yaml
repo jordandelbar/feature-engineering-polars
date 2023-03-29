@@ -1,0 +1,32 @@
+default_install_hook_types: [pre-commit, commit-msg]
+
+repos:
+
+- repo: https://github.com/charliermarsh/ruff-pre-commit
+  rev: 'v0.0.259'
+  hooks:
+    - id: ruff
+
+- repo: https://github.com/pre-commit/pre-commit-hooks
+  rev: v4.4.0
+  hooks:
+  - id: trailing-whitespace
+  - id: end-of-file-fixer
+  - id: check-yaml
+  - id: check-added-large-files
+
+- repo: https://github.com/psf/black
+  rev: 23.1.0
+  hooks:
+  - id: black
+    args: [--config, pyproject.toml]
+    files: \.py$
+
+- repo: local
+  hooks:
+    - id: validate-commit-msg
+      name: validate-commit-msg
+      language: pygrep
+      entry: ^(feat|fix|docs|style|refactor|perf|test|build|ci|chore|revert)(!?)(:)\s{1}[A-Z][\w,\W,:]*$
+      stages: [commit-msg]
+      args: [--multiline, --negate]

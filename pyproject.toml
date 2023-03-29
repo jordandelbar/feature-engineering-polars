@@ -1,0 +1,64 @@
+[tool.black]
+line-length = 88
+target-version = ['py310']
+include = '\.pyi?$'
+
+[tool.ruff]
+line-length = 88
+fix = true
+select = ["D", "E", "F", "I", "N"]
+ignore = ["D104", "D105", "N803", "N806"]
+fixable = ["E", "F", "I"]
+unfixable = []
+
+# Exclude a variety of commonly ignored directories.
+exclude = [
+    ".bzr",
+    ".direnv",
+    ".eggs",
+    ".git",
+    ".hg",
+    ".mypy_cache",
+    ".nox",
+    ".pants.d",
+    ".pytype",
+    ".ruff_cache",
+    ".svn",
+    ".tox",
+    ".venv",
+    "__pypackages__",
+    "_build",
+    "buck-out",
+    "build",
+    "dist",
+    "node_modules",
+    "venv",
+]
+
+[tool.ruff.pydocstyle]
+convention = "google"
+
+[tool.poetry]
+name = "feature-engineering-polars"
+version = "0.1.0"
+description = "Feature engineering done with Polars"
+authors = ["Jordan Delbar <jordandelbar@gmail.com>"]
+license = "MIT License"
+readme = "README.md"
+packages = [{ include = "feature_engineering_polars" }]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+polars = "^0.16.14"
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.0.259"
+black = "^23.1.0"
+pre-commit = { version = "^3.2.0", python = "^3.8" }
+
+[tool.poetry.group.test.dependencies]
+pytest = "^7.2.2"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
