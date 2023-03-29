@@ -26,7 +26,7 @@ jobs:
   build-publish:
     runs-on: ubuntu-latest
     needs: release-please
-    if: needs.release-please.outputs.release_created_output == "true"
+    if: needs.release-please.outputs.release_created_output == 'true'
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4
