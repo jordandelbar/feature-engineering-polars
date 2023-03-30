@@ -85,11 +85,25 @@ class TargetEncoder:
         features_with_unseen = list()
         for feature in self.mapping.keys():
             mapping_table = polars.from_dict(self.mapping[feature]["table"])
-            mapping_table = mapping_table.with_columns(
-                polars.col(feature).cast(self.mapping[feature]["dtype"])
-            )
+
+            # Enforce mapping dtype if different
+            if x[feature].dtype != self.mapping[feature]["dtype"]:
+                logger = logging.getLogger(__name__)
+                logger.warning(
+                    msg=(
+                        f"Feature ['{feature}'] was mapped "
+                        f"with dtype {self.mapping[feature]['dtype']} "
+                        f"not {x[feature].dtype}, "
+                        f"{self.mapping[feature]['dtype']} was enforced"
+                    )
+                )
+                x = x.with_columns(
+                    polars.col(feature).cast(self.mapping[feature]["dtype"])
+                )
+
             temp = x.join(mapping_table, on=feature, how="left")
             x = temp.replace(feature, temp["encoding"]).select(x.columns)
+
             # Handling of unseen data
             if x[feature].is_null().any():
                 features_with_unseen.append(feature)
@@ -99,7 +113,7 @@ class TargetEncoder:
         if features_with_unseen:
             logger = logging.getLogger(__name__)
             logger.warning(
-                f"Feature(s) {features_with_unseen} has unseen values, defaults to global mean"  # noqa: E501
+                f"{features_with_unseen} have unseen values, defaults to global mean"  # noqa: E501
             )
         return x
 

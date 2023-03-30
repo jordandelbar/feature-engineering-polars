@@ -76,9 +76,7 @@ def test_target_encoding_nulls(
         x=with_categorical_nulls_polars_dataframe.select(polars.col("City"))
     )
 
-    assert (
-        "Feature(s) ['City'] has unseen values, defaults to global mean" in caplog.text
-    )
+    assert "['City'] have unseen values, defaults to global mean" in caplog.text
 
 
 def test_target_encoding_with_series(standard_polars_dataframe, standard_polars_series):
@@ -94,7 +92,21 @@ def test_target_encoding_with_series(standard_polars_dataframe, standard_polars_
     assert math.isclose(a=result, b=117.875, abs_tol=0.001)
 
 
-def test_target_encoding_with_different_dtypes():
+def test_target_encoding_with_different_dtypes(caplog, standard_polars_dataframe):
     """Test if the data dtypes is correctly enforced."""
-    # TODO
-    pass
+    dataframe_int = standard_polars_dataframe
+    dataframe_str = standard_polars_dataframe.with_columns(
+        polars.col("Rain").cast(polars.Utf8)
+    )
+
+    encoder = TargetEncoder(smoothing=1, features_to_encode=["Rain"])
+    encoder.fit(x=dataframe_int.select("Rain"), y=dataframe_str.select("Temperature"))
+
+    transformed_int = encoder.transform(x=dataframe_int)
+    transformed_str = encoder.transform(x=dataframe_str)
+
+    assert transformed_int.frame_equal(transformed_str)
+    assert (
+        "Feature ['Rain'] was mapped with dtype Int64 not Utf8, Int64 was enforced"
+        in caplog.text
+    )
