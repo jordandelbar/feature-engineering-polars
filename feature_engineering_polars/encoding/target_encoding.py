@@ -5,7 +5,7 @@ Target encoding is a technique used in data science to encode categorical variab
 It replaces each categorical value with the mean of the target variable for that value.
 """
 import logging
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 import polars
 
@@ -22,8 +22,8 @@ class TargetEncoder:
         """
         self.smoothing = smoothing
         self.features_to_encode = features_to_encode
-        self.global_mean = None
-        self.mapping = dict()
+        self.global_mean: Union[int, float, None] = None
+        self.mapping: Dict[str, Dict[str, Any]] = dict()
 
     def fit(
         self, x: polars.DataFrame, y: Union[polars.Series, polars.DataFrame]
@@ -62,7 +62,8 @@ class TargetEncoder:
             # Compute the smoothed mean
             smooth = agg.with_columns(
                 encoding=(
-                    polars.col("count") * polars.col("mean") + self.smoothing * mean
+                    polars.col("count") * polars.col("mean")
+                    + self.smoothing * mean  # type: ignore
                 )
                 / (polars.col("count") + self.smoothing)
             ).select([polars.col(feature), polars.col("encoding")])
