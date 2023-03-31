@@ -40,7 +40,7 @@ convention = "google"
 
 [tool.poetry]
 name = "feature-engineering-polars"
-version = "0.1.0"
+version = "0.1.1"
 description = "Feature engineering done with Polars"
 authors = ["Jordan Delbar <jordandelbar@gmail.com>"]
 license = "MIT License"
