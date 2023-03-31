@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.1.2](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.1.1...v0.1.2) (2023-03-31)
+
+
+### Bug Fixes
+
+* Mapping table not being cast correctly ([#9](https://github.com/jordandelbar/feature-engineering-polars/issues/9)) ([ababc65](https://github.com/jordandelbar/feature-engineering-polars/commit/ababc65bb69debc50b5b98e3ce3fe79729fdef38))
+
 ## [0.1.1](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.1.0...v0.1.1) (2023-03-31)
 
 
