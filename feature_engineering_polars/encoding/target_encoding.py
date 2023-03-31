@@ -85,6 +85,9 @@ class TargetEncoder:
         features_with_unseen = list()
         for feature in self.mapping.keys():
             mapping_table = polars.from_dict(self.mapping[feature]["table"])
+            mapping_table = mapping_table.with_columns(
+                polars.col(feature).cast(self.mapping[feature]["dtype"])
+            )
 
             # Enforce mapping dtype if different
             if x[feature].dtype != self.mapping[feature]["dtype"]:
