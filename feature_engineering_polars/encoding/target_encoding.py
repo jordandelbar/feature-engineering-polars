@@ -5,7 +5,7 @@ Target encoding is a technique used in data science to encode categorical variab
 It replaces each categorical value with the mean of the target variable for that value.
 """
 import logging
-from typing import List, Union
+from typing import Any, Dict, List, Union
 
 import polars
 
@@ -22,8 +22,8 @@ class TargetEncoder:
         """
         self.smoothing = smoothing
         self.features_to_encode = features_to_encode
-        self.global_mean = None
-        self.mapping = dict()
+        self.global_mean: Union[int, float, None] = None
+        self.mapping: Dict[str, Dict[str, Any]] = dict()
 
     def fit(
         self, x: polars.DataFrame, y: Union[polars.Series, polars.DataFrame]
@@ -62,7 +62,8 @@ class TargetEncoder:
             # Compute the smoothed mean
             smooth = agg.with_columns(
                 encoding=(
-                    polars.col("count") * polars.col("mean") + self.smoothing * mean
+                    polars.col("count") * polars.col("mean")
+                    + self.smoothing * mean  # type: ignore
                 )
                 / (polars.col("count") + self.smoothing)
             ).select([polars.col(feature), polars.col("encoding")])
@@ -84,11 +85,25 @@ class TargetEncoder:
         features_with_unseen = list()
         for feature in self.mapping.keys():
             mapping_table = polars.from_dict(self.mapping[feature]["table"])
-            mapping_table = mapping_table.with_columns(
-                polars.col(feature).cast(self.mapping[feature]["dtype"])
-            )
+
+            # Enforce mapping dtype if different
+            if x[feature].dtype != self.mapping[feature]["dtype"]:
+                logger = logging.getLogger(__name__)
+                logger.warning(
+                    msg=(
+                        f"Feature ['{feature}'] was mapped "
+                        f"with dtype {self.mapping[feature]['dtype']} "
+                        f"not {x[feature].dtype}, "
+                        f"{self.mapping[feature]['dtype']} was enforced"
+                    )
+                )
+                x = x.with_columns(
+                    polars.col(feature).cast(self.mapping[feature]["dtype"])
+                )
+
             temp = x.join(mapping_table, on=feature, how="left")
             x = temp.replace(feature, temp["encoding"]).select(x.columns)
+
             # Handling of unseen data
             if x[feature].is_null().any():
                 features_with_unseen.append(feature)
@@ -98,7 +113,7 @@ class TargetEncoder:
         if features_with_unseen:
             logger = logging.getLogger(__name__)
             logger.warning(
-                f"Feature(s) {features_with_unseen} has unseen values, defaults to global mean"  # noqa: E501
+                f"{features_with_unseen} have unseen values, defaults to global mean"  # noqa: E501
             )
         return x
 

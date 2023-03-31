@@ -3,7 +3,7 @@
 Mean imputation is a method of handling missing data by replacing missing values
 with the mean value of the entire feature.
 """
-from typing import List, Union
+from typing import Dict, List, Union
 
 import polars
 
@@ -18,7 +18,7 @@ class MeanImputer:
             features_to_impute (list): list of feature to impute
         """
         self.features_to_impute = features_to_impute
-        self.mapping = dict()
+        self.mapping: Dict[str, float] = dict()
 
     def fit(self, x: polars.DataFrame):
         """Fit.
@@ -36,7 +36,7 @@ class MeanImputer:
             self.mapping[features] = x[features].mean()
         return None
 
-    def transform(self, x: polars.DataFrame):
+    def transform(self, x: polars.DataFrame) -> polars.DataFrame:
         """Transform.
 
         Args:
@@ -53,7 +53,7 @@ class MeanImputer:
             )
         return x
 
-    def fit_transform(self, x: polars.DataFrame):
+    def fit_transform(self, x: polars.DataFrame) -> polars.DataFrame:
         """Fit & transform.
 
         Args:
