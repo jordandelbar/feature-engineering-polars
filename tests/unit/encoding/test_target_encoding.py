@@ -94,18 +94,38 @@ def test_target_encoding_with_series(standard_polars_dataframe, standard_polars_
 
 def test_target_encoding_with_different_dtypes(caplog, standard_polars_dataframe):
     """Test if the data dtypes is correctly enforced."""
-    dataframe_int = standard_polars_dataframe
     dataframe_str = standard_polars_dataframe.with_columns(
         polars.col("Rain").cast(polars.Utf8)
+    ).clone()
+    dataframe_int32 = standard_polars_dataframe.with_columns(
+        polars.col("Rain").cast(polars.Int32)
+    ).clone()
+    dataframe_int64 = standard_polars_dataframe.with_columns(
+        polars.col("Rain").cast(polars.Int64)
+    ).clone()
+
+    encoder_str = TargetEncoder(smoothing=1, features_to_encode=["Rain"])
+    encoder_int64 = TargetEncoder(smoothing=1, features_to_encode=["Rain"])
+    encoder_int32 = TargetEncoder(smoothing=1, features_to_encode=["Rain"])
+
+    encoder_str.fit(
+        x=dataframe_str.select("Rain"), y=dataframe_str.select("Temperature")
+    )
+    encoder_int64.fit(
+        x=dataframe_int64.select("Rain"), y=dataframe_int64.select("Temperature")
+    )
+    encoder_int32.fit(
+        x=dataframe_int32.select("Rain"), y=dataframe_int64.select("Temperature")
     )
 
-    encoder = TargetEncoder(smoothing=1, features_to_encode=["Rain"])
-    encoder.fit(x=dataframe_int.select("Rain"), y=dataframe_str.select("Temperature"))
+    transformed_str = encoder_int64.transform(x=dataframe_str)
+    transformed_int64 = encoder_str.transform(x=dataframe_int64)
+    transformed_int32 = encoder_int64.transform(x=dataframe_int32)
+    transformed_itself = encoder_int32.transform(x=dataframe_int32)
 
-    transformed_int = encoder.transform(x=dataframe_int)
-    transformed_str = encoder.transform(x=dataframe_str)
-
-    assert transformed_int.frame_equal(transformed_str)
+    assert transformed_int64.frame_equal(transformed_str)
+    assert transformed_int32.frame_equal(transformed_int64)
+    assert transformed_itself.frame_equal(transformed_int64)
     assert (
         "Feature ['Rain'] was mapped with dtype Int64 not Utf8, Int64 was enforced"
         in caplog.text
