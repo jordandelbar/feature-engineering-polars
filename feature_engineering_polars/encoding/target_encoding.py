@@ -84,10 +84,10 @@ class TargetEncoder:
         """
         features_with_unseen = list()
         for feature in self.mapping.keys():
-            mapping_table = polars.from_dict(self.mapping[feature]["table"])
-            mapping_table = mapping_table.with_columns(
-                polars.col(feature).cast(self.mapping[feature]["dtype"])
-            )
+            # Cast the mapping table
+            mapping_table = polars.from_dict(
+                self.mapping[feature]["table"]
+            ).with_columns(polars.col(feature).cast(self.mapping[feature]["dtype"]))
 
             # Enforce mapping dtype if different
             if x[feature].dtype != self.mapping[feature]["dtype"]:
@@ -108,6 +108,7 @@ class TargetEncoder:
             x = temp.replace(feature, temp["encoding"]).select(x.columns)
 
             # Handling of unseen data
+            # TODO: let user choose strategy
             if x[feature].is_null().any():
                 features_with_unseen.append(feature)
                 x = x.with_columns(
