@@ -3,7 +3,7 @@ import math
 
 import polars
 
-from feature_engineering_polars.encoding.target_encoding import TargetEncoder
+from fe_polars.encoding.target_encoding import TargetEncoder
 
 
 def test_target_encoding(standard_polars_dataframe):
