@@ -1,7 +1,7 @@
 """Test Mean Imputing."""
 import math
 
-from feature_engineering_polars.imputing.mean_imputing import MeanImputer
+from fe_polars.imputing.mean_imputing import MeanImputer
 
 
 def test_mean_imputing(with_numerical_nulls_polars_dataframe):
