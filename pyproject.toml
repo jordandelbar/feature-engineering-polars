@@ -45,7 +45,7 @@ description = "Feature engineering done with Polars"
 authors = ["Jordan Delbar <jordandelbar@gmail.com>"]
 license = "MIT License"
 readme = "README.md"
-packages = [{ include = "feature_engineering_polars" }]
+packages = [{ include = "fe_polars" }]
 
 [tool.poetry.dependencies]
 python = "^3.7"
