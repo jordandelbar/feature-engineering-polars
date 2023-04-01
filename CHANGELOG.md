@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.2.0](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.1.2...v0.2.0) (2023-04-01)
+
+
+### ⚠ BREAKING CHANGES
+
+* Change MeanImputer to Imputer ([#14](https://github.com/jordandelbar/feature-engineering-polars/issues/14))
+* Change package import name ([#13](https://github.com/jordandelbar/feature-engineering-polars/issues/13))
+
+### Documentation
+
+* Update README.md ([#12](https://github.com/jordandelbar/feature-engineering-polars/issues/12)) ([7f624c1](https://github.com/jordandelbar/feature-engineering-polars/commit/7f624c1738de09dc3173b76e6123da2721ba1ae0))
+
+
+### Code Refactoring
+
+* Change MeanImputer to Imputer ([#14](https://github.com/jordandelbar/feature-engineering-polars/issues/14)) ([070ef19](https://github.com/jordandelbar/feature-engineering-polars/commit/070ef19297b7aa612f09411d3198154bff016176))
+* Change package import name ([#13](https://github.com/jordandelbar/feature-engineering-polars/issues/13)) ([636788e](https://github.com/jordandelbar/feature-engineering-polars/commit/636788ed7632b8e59cd8d8b9b43ee125bde149db))
+
 ## [0.1.2](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.1.1...v0.1.2) (2023-03-31)
 
 
