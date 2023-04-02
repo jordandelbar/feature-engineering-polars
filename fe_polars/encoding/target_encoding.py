@@ -20,6 +20,8 @@ class TargetEncoder:
             smoothing (int): smoothing to apply
             features_to_encode (str | list): list of features to encode
         """
+        if isinstance(features_to_encode, str):
+            features_to_encode = [features_to_encode]
         self.smoothing = smoothing
         self.features_to_encode = features_to_encode
         self.global_mean: Union[int, float, None] = None
@@ -47,9 +49,6 @@ class TargetEncoder:
         # Compute the global mean
         mean = x[on].mean()
         self.global_mean = mean
-
-        if isinstance(self.features_to_encode, str):
-            self.features_to_encode = [self.features_to_encode]
 
         for feature in self.features_to_encode:
             # Compute the count and mean of each group
