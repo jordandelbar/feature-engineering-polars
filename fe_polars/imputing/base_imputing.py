@@ -34,7 +34,7 @@ class Imputer:
         """Init.
 
         Args:
-            features_to_impute (list): list of feature to impute
+            features_to_impute (str | list): list of feature to impute
             strategy (str): imputing strategy to apply
         """
         strategies = ["mean", "median", "mode", "max", "min"]
