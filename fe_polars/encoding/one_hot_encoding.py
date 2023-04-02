@@ -47,8 +47,24 @@ class OneHotEncoder:
         """
         for feature in self.features_to_encode:
             one_hot = x.select(feature).to_dummies()
+            x = polars.concat([x, one_hot], how="horizontal")
             if self.strategy == "drop":
-                x = polars.concat([x, one_hot], how="horizontal").drop(feature)
-            elif self.strategy == "keep":
-                x = polars.concat([x, one_hot], how="horizontal")
+                x = x.drop(feature)
         return x
+
+    def fit_transform(
+        self,
+        x: polars.DataFrame,
+        y: Optional[Union[polars.Series, polars.DataFrame]] = None,
+    ) -> polars.DataFrame:
+        """Fit and apply one hot encoding to the provided dataframe.
+
+        Args:
+            x (polars.DataFrame): features table to fit and transform
+            y (y: Union[polars.Series, polars.DataFrame]): target
+
+        Returns:
+            polars.DataFrame: transformed dataframe
+        """
+        self.fit(x=x, y=y)
+        return self.transform(x=x)
