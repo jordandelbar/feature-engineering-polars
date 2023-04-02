@@ -29,8 +29,8 @@ def with_categorical_nulls_polars_dataframe():
     return polars.DataFrame(
         {
             "City": ["A", "A", "B", "B", None, "C", "C", None],
-            "Temperature": [30.5, 32, 25, 38, 40, 29.6, 21.3, 24.9],
-            "Rain": [103, 125, 90, 75, 130, 200, 155, 127],
+            "Temperature": [30.5, 32, 32, 38, 40, 29.6, 21.3, None],
+            "Rain": [103, None, 103, 75, 130, 200, 155, 127],
         }
     )
 

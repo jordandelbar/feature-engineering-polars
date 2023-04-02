@@ -130,3 +130,12 @@ def test_target_encoding_with_different_dtypes(caplog, standard_polars_dataframe
         "Feature ['Rain'] was mapped with dtype Int64 not Utf8, Int64 was enforced"
         in caplog.text
     )
+
+
+def test_features_to_encode_type():
+    """Test if using str or list for features_to_encode works correctly."""
+    str_encoder = TargetEncoder(smoothing=1, features_to_encode="City")
+    list_encoder = TargetEncoder(smoothing=1, features_to_encode=["City"])
+
+    assert isinstance(str_encoder.features_to_encode, list)
+    assert isinstance(list_encoder.features_to_encode, list)
