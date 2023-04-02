@@ -48,3 +48,16 @@ f64	    f64	        f64
 27.225	    21.3	155.0
 27.225	    24.9	127.0
 ```
+
+## Available transformers
+
+- Encoding:
+    - Target encoding
+    - One hot encoding
+- Imputing:
+    - Base imputing:
+        - Mean imputing
+        - Median imputing
+        - Mode imputing
+        - Max imputing
+        - Min imputing
