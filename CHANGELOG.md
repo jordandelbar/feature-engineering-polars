@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.2.1](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.2.0...v0.2.1) (2023-04-02)
+
+
+### Features
+
+* Add one-hot-encoding ([#19](https://github.com/jordandelbar/feature-engineering-polars/issues/19)) ([b6bfe31](https://github.com/jordandelbar/feature-engineering-polars/commit/b6bfe3189f97462394dd078d5eea91616632f16a))
+
 ## [0.2.0](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.1.2...v0.2.0) (2023-04-01)
 
 
