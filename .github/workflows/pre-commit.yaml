@@ -5,9 +5,6 @@ on:
       - dev
       - main
   workflow_dispatch:
-    branches:
-      - dev
-      - main
 
 jobs:
   pre-commit-checks:
