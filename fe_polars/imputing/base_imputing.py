@@ -40,8 +40,13 @@ class Imputer:
                 - strategy
                 - strategy_dict
         """
-        valid_params = {"features_to_impute", "strategy", "strategy_dict"}
-        valid_strategies = {"mean", "median", "mode", "max", "min"}
+        valid_params = {
+            "features_to_impute",
+            "strategy",
+            "strategy_dict",
+            "fixed_value",
+        }
+        valid_strategies = {"mean", "median", "mode", "max", "min", "fixed_value"}
 
         # Check that all provided parameters are valid
         for param_name in kwargs:
@@ -51,6 +56,7 @@ class Imputer:
         self.features_to_impute = kwargs.get("features_to_impute", None)
         self.strategy = kwargs.get("strategy", None)
         self.strategy_dict = kwargs.get("strategy_dict", dict())
+        self.fixed_value = kwargs.get("fixed_value", None)
         self.mapping = dict()
 
         if self.strategy:
@@ -60,20 +66,20 @@ class Imputer:
         if isinstance(self.features_to_impute, str):
             self.features_to_impute = [self.features_to_impute]
 
+        for i in self.strategy_dict.keys():
+            if isinstance(self.strategy_dict[i], str):
+                self.strategy_dict[i] = [self.strategy_dict[i]]
+
         if not self.strategy_dict:
             self.map_strategy_dict()
 
     def map_strategy_dict(self):
         """Map the strategies for each column."""
         if self.features_to_impute is not None and self.strategy is not None:
-            self.strategy_dict = {
-                feature: self.strategy for feature in self.features_to_impute
-            }
+            self.strategy_dict = {self.strategy: self.features_to_impute}
 
         elif self.features_to_impute is not None and self.strategy is None:
-            self.strategy_dict = {
-                feature: "mean" for feature in self.features_to_impute
-            }
+            self.strategy_dict = {"mean": self.features_to_impute}
 
     def fit(
         self,
@@ -100,56 +106,58 @@ class Imputer:
             ]
             self.map_strategy_dict()
 
-        for feature in self.strategy_dict.keys():
-            if self.strategy_dict[feature] == "mean":
-                self.mapping[feature] = x[feature].mean()
+        for strategy in self.strategy_dict.keys():
+            for feature in self.strategy_dict[strategy]:
+                if strategy == "mean":
+                    self.mapping[feature] = x[feature].mean()
 
-            elif self.strategy_dict[feature] == "median":
-                self.mapping[feature] = x[feature].median()
+                elif strategy == "median":
+                    self.mapping[feature] = x[feature].median()
 
-            elif self.strategy_dict[feature] == "mode":
-                # FIXME: This part should be discuted at some point to
-                # agree upon a smart way to handle this based on use cases.
-                if x[feature].dtype in [
-                    polars.Float32,
-                    polars.Float64,
-                    polars.Boolean,
-                    polars.Decimal,
-                ]:
-                    raise TypeError(
-                        f"dtype `{x[feature].dtype}` is not supported for mode strategy"
-                    )
-                # If there is only one value that is the most-frequent
-                if x[feature].mode().shape[0] <= 1:
-                    # If the most frequent value is not null
-                    if x[feature].mode().item():
-                        self.mapping[feature] = x[feature].mode()
+                elif strategy == "mode":
+                    # FIXME: This part should be discuted at some point to
+                    # agree upon a smart way to handle this based on use cases.
+                    if x[feature].dtype in [
+                        polars.Float32,
+                        polars.Float64,
+                        polars.Boolean,
+                        polars.Decimal,
+                    ]:
+                        raise TypeError(
+                            f"dtype `{x[feature].dtype}` is"
+                            " not supported for mode strategy"
+                        )
+                    # If there is only one value that is the most-frequent
+                    if x[feature].mode().shape[0] <= 1:
+                        # If the most frequent value is not null
+                        if x[feature].mode().item():
+                            self.mapping[feature] = x[feature].mode()
 
-                    # Else we take the second most frequent value
+                        # Else we take the second most frequent value
+                        else:
+                            logger = logging.getLogger(__name__)
+                            # Warning: We are sorting the value counts by the feature
+                            # value in case there is ex-aequo.
+                            self.mapping[feature] = (
+                                x[feature]
+                                .value_counts()
+                                .sort(by=["counts", feature], descending=True)[1, :]
+                                .select(feature)
+                                .item()
+                            )
+                            logger.warning(
+                                f"Most frequent value for ['{feature}'] "
+                                "is Null, defaults to the second most "
+                                f"frequent value: {self.mapping[feature]}."
+                            )
                     else:
-                        logger = logging.getLogger(__name__)
-                        # Warning: We are sorting the value counts by the feature value
-                        # in case there is ex-aequo.
-                        self.mapping[feature] = (
-                            x[feature]
-                            .value_counts()
-                            .sort(by=["counts", feature], descending=True)[1, :]
-                            .select(feature)
-                            .item()
-                        )
-                        logger.warning(
-                            f"Most frequent value for ['{feature}'] "
-                            "is Null, defaults to the second most "
-                            f"frequent value: {self.mapping[feature]}."
-                        )
-                else:
-                    # We take the first most frequent value
-                    self.mapping[feature] = x[feature].mode()[0]
+                        # We take the first most frequent value
+                        self.mapping[feature] = x[feature].mode()[0]
 
-            elif self.strategy_dict[feature] == "max":
-                self.mapping[feature] = x[feature].max()
-            elif self.strategy_dict[feature] == "min":
-                self.mapping[feature] = x[feature].min()
+                elif strategy == "max":
+                    self.mapping[feature] = x[feature].max()
+                elif strategy == "min":
+                    self.mapping[feature] = x[feature].min()
         return None
 
     def transform(self, x: polars.DataFrame) -> polars.DataFrame:

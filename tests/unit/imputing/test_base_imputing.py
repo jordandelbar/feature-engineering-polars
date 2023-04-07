@@ -144,7 +144,7 @@ def test_min_max_imputing(with_numerical_nulls_polars_dataframe):
 
 def test_strategy_dict(with_numerical_nulls_polars_dataframe):
     """Test the strategy dict option."""
-    imputer = Imputer(strategy_dict={"Rain": "max"})
+    imputer = Imputer(strategy_dict={"max": "Rain"})
     result = imputer.fit_transform(with_numerical_nulls_polars_dataframe)
     assert result["Rain"].null_count() == 0
 
