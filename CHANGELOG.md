@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.1](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.3.0...v0.3.1) (2023-04-07)
+
+
+### Features
+
+* Doc correctionn in base imputing ([#27](https://github.com/jordandelbar/feature-engineering-polars/issues/27)) ([f16ed57](https://github.com/jordandelbar/feature-engineering-polars/commit/f16ed576bb0318426a9d4e33a7ff5dd6237c552c))
+
 ## [0.3.0](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.2.1...v0.3.0) (2023-04-07)
 
 
