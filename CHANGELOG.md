@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.3.0](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.2.1...v0.3.0) (2023-04-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* Imputer ([#24](https://github.com/jordandelbar/feature-engineering-polars/issues/24))
+
+### Code Refactoring
+
+* Imputer ([#24](https://github.com/jordandelbar/feature-engineering-polars/issues/24)) ([459a4ca](https://github.com/jordandelbar/feature-engineering-polars/commit/459a4cae65160deb577188489167e2aaf4e1695f))
+
 ## [0.2.1](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.2.0...v0.2.1) (2023-04-02)
 
 
