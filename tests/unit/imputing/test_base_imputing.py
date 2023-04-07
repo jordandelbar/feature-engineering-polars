@@ -82,6 +82,20 @@ def test_strategy_dict(with_numerical_nulls_polars_dataframe):
     assert result["Rain"].null_count() == 0
 
 
+def test_bad_strategy_dict():
+    """Test the strategy dict with wrong strategy."""
+    with pytest.raises(ValueError) as excinfo:
+        _ = Imputer(strategy_dict={"bad-strategy": ["Rain"]})
+        assert str(excinfo.value).contains("strategy must be one of")
+
+
+def test_too_many_arg_provided():
+    """Test if too many arguments are provided."""
+    with pytest.raises(ValueError) as excinfo:
+        _ = Imputer(strategy_dict={"mean": ["Rain"]}, fixed_value=3)
+        assert str(excinfo.value).contains("Cannot use 'strategy_dict' with")
+
+
 def test_no_arg_provided(with_numerical_nulls_polars_dataframe):
     """Test the class if no argument is provided."""
     imputer = Imputer()
@@ -126,3 +140,29 @@ def test_bad_parameter():
         assert str(excinfo.value).contains(
             "Invalid parameter 'wrong_argument' provided."
         )
+
+
+def test_categorical_value(with_categorical_nulls_polars_dataframe):
+    """Test error message when providng a categorical value."""
+    imputer = Imputer(features_to_impute="City")
+    with pytest.raises(ValueError) as excinfo:
+        imputer.fit(with_categorical_nulls_polars_dataframe)
+        assert str(excinfo.value).contains(
+            "ValueError: City is not a numerical feature"
+        )
+
+
+def test_fixed_value(with_numerical_nulls_polars_dataframe):
+    """Test if using fixed value as strategy."""
+    imputer = Imputer(features_to_impute="Rain", fixed_value=0)
+    result = imputer.fit_transform(with_numerical_nulls_polars_dataframe)
+    result = result.select("Rain")[1, :].item()
+    assert math.isclose(result, 0.0)
+
+
+def test_fixed_value_and_strategy(with_numerical_nulls_polars_dataframe):
+    """Test if working if using and fixed_value and strategy parameters."""
+    imputer = Imputer(strategy="fixed_value", fixed_value=1)
+    result = imputer.fit_transform(with_numerical_nulls_polars_dataframe)
+    result = result.select("Rain")[1, :].item()
+    assert math.isclose(result, 1.0)
