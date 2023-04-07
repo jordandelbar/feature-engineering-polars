@@ -58,6 +58,6 @@ f64	    f64	        f64
     - Base imputing:
         - Mean imputing
         - Median imputing
-        - Mode imputing
         - Max imputing
         - Min imputing
+        - Fixed value imputing

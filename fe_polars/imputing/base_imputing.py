@@ -17,16 +17,16 @@ import polars
 class Imputer:
     """Imputer class.
 
-    Impute a value in place of the Null records in the dataframe
+    Impute a value in place of the null records in the dataframe
     depending on the strategy chosen.
 
-    Available strategies:
-
-    - Mean: strategy="mean"
-    - Median: strategy="median"
-    - Maximum: strategy="max"
-    - Minimum: strategy="min"
-    - Fixed value: strategy="fixed_value"
+    Args:
+        feature_to_impute (list): list of features to impute
+        strategy (str): imputation strategy
+        fixed_value (float): specific value to be imputed
+                             (with "fixed_value" strategy)
+        strategy_dict (dict): dictionnary describing strategies to apply
+                              by feature
     """
 
     def __init__(self, **kwargs):
@@ -38,6 +38,7 @@ class Imputer:
                 - features_to_impute
                 - strategy
                 - strategy_dict
+                - fixed_value
         """
         valid_params = {
             "features_to_impute",
