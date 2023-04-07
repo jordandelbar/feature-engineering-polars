@@ -142,6 +142,31 @@ def test_min_max_imputing(with_numerical_nulls_polars_dataframe):
     assert math.isclose(result_min, 75, abs_tol=0.001)
 
 
+def test_strategy_dict(with_numerical_nulls_polars_dataframe):
+    """Test the strategy dict option."""
+    imputer = Imputer(strategy_dict={"Rain": "max"})
+    result = imputer.fit_transform(with_numerical_nulls_polars_dataframe)
+    assert result["Rain"].null_count() == 0
+
+
+def test_no_arg_provided(with_numerical_nulls_polars_dataframe):
+    """Test the class if no argument is provided."""
+    imputer = Imputer()
+    result = imputer.fit_transform(with_numerical_nulls_polars_dataframe)
+    assert result["Rain"].null_count() == 0
+
+
+def test_only_one_arg_provided(with_numerical_nulls_polars_dataframe):
+    """Test the class if only one of the argument is provided."""
+    imputer_strat = Imputer(strategy="mode")
+    result_strat = imputer_strat.fit_transform(with_numerical_nulls_polars_dataframe)
+
+    imputer_fti = Imputer(features_to_impute=["Rain"])
+    result_fti = imputer_fti.fit_transform(with_numerical_nulls_polars_dataframe)
+    assert result_strat["Rain"].null_count() == 0
+    assert result_fti["Rain"].null_count() == 0
+
+
 def test_bad_strategy():
     """Test bad strategy.
 
@@ -149,10 +174,7 @@ def test_bad_strategy():
     """
     with pytest.raises(ValueError) as excinfo:
         _ = Imputer(features_to_impute=["Rain"], strategy="bad-strategy")
-    assert (
-        str(excinfo.value)
-        == "strategy must be one of ['mean', 'median', 'mode', 'max', 'min']"
-    )
+        assert str(excinfo.value).contains("strategy must be one of")
 
 
 def test_features_to_impute_type():
@@ -162,3 +184,12 @@ def test_features_to_impute_type():
 
     assert isinstance(str_imputer.features_to_impute, list)
     assert isinstance(list_imputer.features_to_impute, list)
+
+
+def test_bad_parameter():
+    """Test error message appears when a wrong parameter is provided."""
+    with pytest.raises(ValueError) as excinfo:
+        _ = Imputer(wrong_argument=["Rain"])
+        assert str(excinfo.value).contains(
+            "Invalid parameter 'wrong_argument' provided."
+        )

@@ -10,7 +10,7 @@ with another value. You can choose between different strategies:
 - Min imputing: replace with the minimum value of the records.
 """
 import logging
-from typing import Dict, List, Optional, Union
+from typing import Optional, Union
 
 import polars
 
@@ -30,21 +30,50 @@ class Imputer:
     - Minimum: strategy="min"
     """
 
-    def __init__(self, features_to_impute: Union[str, List], strategy: str = "mean"):
+    def __init__(self, **kwargs):
         """Init.
 
         Args:
-            features_to_impute (str | list): list of feature to impute
-            strategy (str): imputing strategy to apply
+            kwargs (dict):
+                A dictionnary of optional arguments. Valid arguments include:
+                - features_to_impute
+                - strategy
+                - strategy_dict
         """
-        strategies = ["mean", "median", "mode", "max", "min"]
-        if strategy not in strategies:
-            raise ValueError(f"strategy must be one of {strategies}")
-        if isinstance(features_to_impute, str):
-            features_to_impute = [features_to_impute]
-        self.features_to_impute = features_to_impute
-        self.strategy = strategy
-        self.mapping: Dict[str, float] = dict()
+        valid_params = {"features_to_impute", "strategy", "strategy_dict"}
+        valid_strategies = {"mean", "median", "mode", "max", "min"}
+
+        # Check that all provided parameters are valid
+        for param_name in kwargs:
+            if param_name not in valid_params:
+                raise ValueError(f"Invalid parameter '{param_name}' provided.")
+
+        self.features_to_impute = kwargs.get("features_to_impute", None)
+        self.strategy = kwargs.get("strategy", None)
+        self.strategy_dict = kwargs.get("strategy_dict", dict())
+        self.mapping = dict()
+
+        if self.strategy:
+            if self.strategy not in valid_strategies:
+                raise ValueError(f"strategy must be one of {valid_strategies}")
+
+        if isinstance(self.features_to_impute, str):
+            self.features_to_impute = [self.features_to_impute]
+
+        if not self.strategy_dict:
+            self.map_strategy_dict()
+
+    def map_strategy_dict(self):
+        """Map the strategies for each column."""
+        if self.features_to_impute is not None and self.strategy is not None:
+            self.strategy_dict = {
+                feature: self.strategy for feature in self.features_to_impute
+            }
+
+        elif self.features_to_impute is not None and self.strategy is None:
+            self.strategy_dict = {
+                feature: "mean" for feature in self.features_to_impute
+            }
 
     def fit(
         self,
@@ -60,15 +89,25 @@ class Imputer:
         Returns:
             None
         """
-        # TODO: give the option to define a strategy by feature
-        for feature in self.features_to_impute:
-            if self.strategy == "mean":
+        # If no strategy dictionnary has been provided and neither was a list of feature
+        # to impute, then we apply the strategy on all the columns that contain
+        # null values
+        if not self.strategy_dict and self.features_to_impute is None:
+            self.features_to_impute = [
+                col
+                for col in x.columns
+                if x[col].is_null().any() and x[col].is_numeric()
+            ]
+            self.map_strategy_dict()
+
+        for feature in self.strategy_dict.keys():
+            if self.strategy_dict[feature] == "mean":
                 self.mapping[feature] = x[feature].mean()
 
-            elif self.strategy == "median":
+            elif self.strategy_dict[feature] == "median":
                 self.mapping[feature] = x[feature].median()
 
-            elif self.strategy == "mode":
+            elif self.strategy_dict[feature] == "mode":
                 # FIXME: This part should be discuted at some point to
                 # agree upon a smart way to handle this based on use cases.
                 if x[feature].dtype in [
@@ -107,9 +146,9 @@ class Imputer:
                     # We take the first most frequent value
                     self.mapping[feature] = x[feature].mode()[0]
 
-            elif self.strategy == "max":
+            elif self.strategy_dict[feature] == "max":
                 self.mapping[feature] = x[feature].max()
-            elif self.strategy == "min":
+            elif self.strategy_dict[feature] == "min":
                 self.mapping[feature] = x[feature].min()
         return None
 
