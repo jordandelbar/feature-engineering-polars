@@ -9,7 +9,6 @@ with another value. You can choose between different strategies:
 - Max imputing: replace with the maximum value of the records.
 - Min imputing: replace with the minimum value of the records.
 """
-import logging
 from typing import Optional, Union
 
 import polars
@@ -25,7 +24,6 @@ class Imputer:
 
     - Mean: strategy="mean"
     - Median: strategy="median"
-    - Mode: strategy="mode"
     - Maximum: strategy="max"
     - Minimum: strategy="min"
     """
@@ -46,7 +44,7 @@ class Imputer:
             "strategy_dict",
             "fixed_value",
         }
-        valid_strategies = {"mean", "median", "mode", "max", "min", "fixed_value"}
+        valid_strategies = {"mean", "median", "max", "min", "fixed_value"}
 
         # Check that all provided parameters are valid
         for param_name in kwargs:
@@ -71,15 +69,29 @@ class Imputer:
                 self.strategy_dict[i] = [self.strategy_dict[i]]
 
         if not self.strategy_dict:
-            self.map_strategy_dict()
+            self._map_strategy_dict()
 
-    def map_strategy_dict(self):
+    def _map_strategy_dict(self):
         """Map the strategies for each column."""
         if self.features_to_impute is not None and self.strategy is not None:
             self.strategy_dict = {self.strategy: self.features_to_impute}
 
         elif self.features_to_impute is not None and self.strategy is None:
             self.strategy_dict = {"mean": self.features_to_impute}
+
+    def _process_strategy(self, strategy, feature, x):
+        """Process the different strategy by feature."""
+        STRATEGY_FUNCTIONS = {
+            "mean": getattr(polars.DataFrame, "mean"),
+            "median": getattr(polars.DataFrame, "median"),
+            "max": getattr(polars.DataFrame, "max"),
+            "min": getattr(polars.DataFrame, "min"),
+        }
+        # Apply the corresponding function based on the strategy
+        if isinstance(x.select(feature), polars.DataFrame):
+            self.mapping[feature] = STRATEGY_FUNCTIONS[strategy](
+                x.select(feature)
+            ).item()
 
     def fit(
         self,
@@ -104,60 +116,14 @@ class Imputer:
                 for col in x.columns
                 if x[col].is_null().any() and x[col].is_numeric()
             ]
-            self.map_strategy_dict()
+            self._map_strategy_dict()
 
         for strategy in self.strategy_dict.keys():
             for feature in self.strategy_dict[strategy]:
-                if strategy == "mean":
-                    self.mapping[feature] = x[feature].mean()
+                if not x[feature].is_numeric():
+                    raise ValueError(f"{feature} is not a numerical feature")
+                self._process_strategy(strategy, feature, x)
 
-                elif strategy == "median":
-                    self.mapping[feature] = x[feature].median()
-
-                elif strategy == "mode":
-                    # FIXME: This part should be discuted at some point to
-                    # agree upon a smart way to handle this based on use cases.
-                    if x[feature].dtype in [
-                        polars.Float32,
-                        polars.Float64,
-                        polars.Boolean,
-                        polars.Decimal,
-                    ]:
-                        raise TypeError(
-                            f"dtype `{x[feature].dtype}` is"
-                            " not supported for mode strategy"
-                        )
-                    # If there is only one value that is the most-frequent
-                    if x[feature].mode().shape[0] <= 1:
-                        # If the most frequent value is not null
-                        if x[feature].mode().item():
-                            self.mapping[feature] = x[feature].mode()
-
-                        # Else we take the second most frequent value
-                        else:
-                            logger = logging.getLogger(__name__)
-                            # Warning: We are sorting the value counts by the feature
-                            # value in case there is ex-aequo.
-                            self.mapping[feature] = (
-                                x[feature]
-                                .value_counts()
-                                .sort(by=["counts", feature], descending=True)[1, :]
-                                .select(feature)
-                                .item()
-                            )
-                            logger.warning(
-                                f"Most frequent value for ['{feature}'] "
-                                "is Null, defaults to the second most "
-                                f"frequent value: {self.mapping[feature]}."
-                            )
-                    else:
-                        # We take the first most frequent value
-                        self.mapping[feature] = x[feature].mode()[0]
-
-                elif strategy == "max":
-                    self.mapping[feature] = x[feature].max()
-                elif strategy == "min":
-                    self.mapping[feature] = x[feature].min()
         return None
 
     def transform(self, x: polars.DataFrame) -> polars.DataFrame:

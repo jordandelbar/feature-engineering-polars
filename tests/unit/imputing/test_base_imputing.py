@@ -23,7 +23,6 @@ then values).
 """
 import math
 
-import polars
 import pytest
 
 from fe_polars.imputing.base_imputing import Imputer
@@ -53,72 +52,6 @@ def test_median_imputing(with_numerical_nulls_polars_dataframe):
     result = result.select("Rain")[1, :].item()
 
     assert math.isclose(result, 115, abs_tol=0.001)
-
-
-def test_mode_imputing(
-    with_categorical_nulls_polars_dataframe, with_numerical_nulls_polars_dataframe
-):
-    """Test median imputing.
-
-    - Assert if mode imputing is correctly done
-    - Assert every polars dtype is correctly handled with Exception
-    - Assert that there is no more null values after transform
-    """
-    # Those dtypes should pass
-    for dtype in [
-        polars.UInt16,
-        polars.UInt32,
-        polars.UInt64,
-        polars.UInt8,
-        polars.Utf8,
-        polars.Int16,
-        polars.Int32,
-        polars.Date,
-        polars.Datetime,
-        polars.Binary,
-        polars.Duration,
-        polars.Time,
-    ]:
-        imputer_mt = Imputer(features_to_impute=["Temperature"], strategy="mode")
-        result_mt = imputer_mt.fit_transform(
-            with_categorical_nulls_polars_dataframe.with_columns(
-                polars.col("Temperature").cast(dtype=dtype)
-            )
-        )
-        assert result_mt["Temperature"].null_count() == 0
-        if dtype == polars.Utf8:
-            assert result_mt["Temperature"][7] == "32.0"
-
-    # Those should raise an exception
-    for dtype in [
-        polars.Float32,
-        polars.Float64,
-        polars.Decimal,
-        polars.Boolean,
-    ]:
-        imputer_mt = Imputer(features_to_impute=["Temperature"], strategy="mode")
-        with pytest.raises(TypeError) as excinfo:
-            _ = imputer_mt.fit_transform(
-                with_categorical_nulls_polars_dataframe.with_columns(
-                    polars.col("Temperature").cast(dtype=dtype)
-                )
-            )
-            assert (
-                str(excinfo.value)
-                == f"dtype `{dtype}` is not supported for mode strategy"
-            )
-    # Second choice test
-    imputer_sct = Imputer(features_to_impute=["Rain"], strategy="mode")
-    result_sct = imputer_sct.fit_transform(with_numerical_nulls_polars_dataframe)
-    assert result_sct["Rain"].null_count() == 0
-
-    result_sct = result_sct.select("Rain")[1, :].item()
-    assert math.isclose(result_sct, 200, abs_tol=0.001)
-
-    # Multiple most-frequent values
-    imputer_mmf = Imputer(features_to_impute=["City"], strategy="mode")
-    result_mmf = imputer_mmf.fit_transform(with_numerical_nulls_polars_dataframe)
-    assert result_mmf["City"].null_count() == 0
 
 
 def test_min_max_imputing(with_numerical_nulls_polars_dataframe):
@@ -158,7 +91,7 @@ def test_no_arg_provided(with_numerical_nulls_polars_dataframe):
 
 def test_only_one_arg_provided(with_numerical_nulls_polars_dataframe):
     """Test the class if only one of the argument is provided."""
-    imputer_strat = Imputer(strategy="mode")
+    imputer_strat = Imputer(strategy="median")
     result_strat = imputer_strat.fit_transform(with_numerical_nulls_polars_dataframe)
 
     imputer_fti = Imputer(features_to_impute=["Rain"])
