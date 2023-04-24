@@ -26,12 +26,13 @@ class OneHotEncoder:
         self,
         x: polars.DataFrame,
         y: Optional[Union[polars.Series, polars.DataFrame]] = None,
-    ) -> None:
+    ) -> "OneHotEncoder":
         """Fit One Hot Encoder.
 
-        Pass as not needed
+        Returns:
+            self
         """
-        return None
+        return self
 
     def transform(
         self,

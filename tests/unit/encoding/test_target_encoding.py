@@ -132,6 +132,17 @@ def test_target_encoding_with_different_dtypes(caplog, standard_polars_dataframe
     )
 
 
+def test_features_not_categorical(caplog):
+    """Test if the encoder raises an error if the features are not categorical."""
+    encoder = TargetEncoder(smoothing=1, features_to_encode=["City"])
+
+    encoder.fit(
+        x=polars.DataFrame({"City": [1, 2, 3, 4]}),
+        y=polars.DataFrame({"Rain": [1, 2, 3, 4]}),
+    )
+    assert "Feature ['City'] is possibly numerical" in caplog.text
+
+
 def test_features_to_encode_type():
     """Test if using str or list for features_to_encode works correctly."""
     str_encoder = TargetEncoder(smoothing=1, features_to_encode="City")

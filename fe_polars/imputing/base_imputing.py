@@ -140,7 +140,7 @@ class Imputer:
         self,
         x: polars.DataFrame,
         y: Optional[Union[polars.DataFrame, polars.Series]] = None,
-    ) -> None:
+    ) -> "Imputer":
         """Fit.
 
         Args:
@@ -148,7 +148,7 @@ class Imputer:
             y (y: Union[polars.Series, polars.DataFrame]): target (not used)
 
         Returns:
-            None
+            self
         """
         # If no strategy dictionnary has been provided and neither was a list of feature
         # to impute, then we apply the strategy on all the columns that contain
@@ -167,7 +167,7 @@ class Imputer:
                     raise ValueError(f"{feature} is not a numerical feature")
                 self._process_strategy(strategy, feature, x)
 
-        return None
+        return self
 
     def transform(self, x: polars.DataFrame) -> polars.DataFrame:
         """Transform.
