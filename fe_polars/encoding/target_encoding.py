@@ -27,9 +27,24 @@ class TargetEncoder:
         self.global_mean: Union[int, float, None] = None
         self.mapping: Dict[str, Dict[str, Any]] = dict()
 
+    def _check_features_unique_values(self, x: polars.DataFrame) -> None:
+        """Check if the features to impute are numerical.
+
+        Args:
+            x (polars.DataFrame): feature dataset
+
+        Returns:
+            None
+        """
+        for feature in self.features_to_encode:
+            pct_unique = x[feature].n_unique() / x.height
+            if pct_unique >= 0.5 and x[feature].is_numeric():
+                logger = logging.getLogger(__name__)
+                logger.warning(f"Feature ['{feature}'] is possibly numerical")
+
     def fit(
         self, x: polars.DataFrame, y: Union[polars.Series, polars.DataFrame]
-    ) -> None:
+    ) -> "TargetEncoder":
         """Fit the target encoder.
 
         Args:
@@ -37,8 +52,11 @@ class TargetEncoder:
             y (y: Union[polars.Series, polars.DataFrame]): target
 
         Returns:
-            None
+            self
         """
+        # Check if the features to impute are numerical and warn the user if not
+        self._check_features_unique_values(x)
+
         if isinstance(y, polars.DataFrame):
             on = y.columns[0]
         else:
@@ -70,7 +88,7 @@ class TargetEncoder:
                 "table": smooth.to_dict(as_series=False),
                 "dtype": x.get_column(feature).dtype,
             }
-        return None
+        return self
 
     def transform(self, x: polars.DataFrame) -> polars.DataFrame:
         """Apply the mapping to the provided dataframe.
