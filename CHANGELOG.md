@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.3.2](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.3.1...v0.3.2) (2023-05-21)
+
+
+### Features
+
+* Add warning for not detected numerical ([#30](https://github.com/jordandelbar/feature-engineering-polars/issues/30)) ([bc50f74](https://github.com/jordandelbar/feature-engineering-polars/commit/bc50f742890ff03fa5251219c9e048564bbfe1d7))
+
 ## [0.3.1](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.3.0...v0.3.1) (2023-04-07)
 
 
