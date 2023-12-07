@@ -57,7 +57,7 @@ def test_target_encoding(standard_polars_dataframe):
     # Assertions
     assert math.isclose(a=smoothing_0_result, b=117.875, abs_tol=0.001)
     assert math.isclose(a=smoothing_25_result, b=124.763, abs_tol=0.001)
-    assert sanity_check_dataframe.frame_equal(standard_polars_dataframe)
+    assert sanity_check_dataframe.equals(standard_polars_dataframe)
 
 
 def test_target_encoding_nulls(
@@ -123,9 +123,9 @@ def test_target_encoding_with_different_dtypes(caplog, standard_polars_dataframe
     transformed_int32 = encoder_int64.transform(x=dataframe_int32)
     transformed_itself = encoder_int32.transform(x=dataframe_int32)
 
-    assert transformed_int64.frame_equal(transformed_str)
-    assert transformed_int32.frame_equal(transformed_int64)
-    assert transformed_itself.frame_equal(transformed_int64)
+    assert transformed_int64.equals(transformed_str)
+    assert transformed_int32.equals(transformed_int64)
+    assert transformed_itself.equals(transformed_int64)
     assert (
         "Feature ['Rain'] was mapped with dtype Int64 not Utf8, Int64 was enforced"
         in caplog.text

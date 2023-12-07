@@ -157,13 +157,13 @@ class Imputer:
             self.features_to_impute = [
                 col
                 for col in x.columns
-                if x[col].is_null().any() and x[col].is_numeric()
+                if x[col].is_null().any() and x[col].dtype.is_numeric()
             ]
             self._map_strategy_dict()
 
         for strategy in self.strategy_dict.keys():
             for feature in self.strategy_dict[strategy]:
-                if not x[feature].is_numeric():
+                if not x[feature].dtype.is_numeric():
                     raise ValueError(f"{feature} is not a numerical feature")
                 self._process_strategy(strategy, feature, x)
 
