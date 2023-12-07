@@ -38,7 +38,7 @@ class TargetEncoder:
         """
         for feature in self.features_to_encode:
             pct_unique = x[feature].n_unique() / x.height
-            if pct_unique >= 0.5 and x[feature].is_numeric():
+            if pct_unique >= 0.5 and x[feature].dtype.is_numeric():
                 logger = logging.getLogger(__name__)
                 logger.warning(f"Feature ['{feature}'] is possibly numerical")
 
@@ -70,7 +70,7 @@ class TargetEncoder:
 
         for feature in self.features_to_encode:
             # Compute the count and mean of each group
-            agg = x.groupby(feature).agg(
+            agg = x.group_by(feature).agg(
                 [
                     polars.count().cast(polars.Float64),
                     polars.col(on).mean().cast(polars.Float64).alias("mean"),
@@ -122,7 +122,7 @@ class TargetEncoder:
                 )
 
             temp = x.join(mapping_table, on=feature, how="left")
-            x = temp.replace(feature, temp["encoding"]).select(x.columns)
+            x = x.with_columns(temp["encoding"].alias(feature)).select(x.columns)
 
             # Handling of unseen data
             # TODO: let user choose strategy
