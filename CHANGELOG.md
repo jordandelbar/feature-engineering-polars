@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.4.0](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.3.2...v0.4.0) (2023-12-07)
+
+
+### ⚠ BREAKING CHANGES
+
+* Update polars to latest version
+
+### Miscellaneous Chores
+
+* Update polars to latest version ([a8605f8](https://github.com/jordandelbar/feature-engineering-polars/commit/a8605f88e40bc4c8dc03c2e02ccfc837fa2fbff9))
+
 ## [0.3.2](https://github.com/jordandelbar/feature-engineering-polars/compare/v0.3.1...v0.3.2) (2023-05-21)
 
 
