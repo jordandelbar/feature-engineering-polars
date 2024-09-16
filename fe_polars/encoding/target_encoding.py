@@ -72,7 +72,7 @@ class TargetEncoder:
             # Compute the count and mean of each group
             agg = x.group_by(feature).agg(
                 [
-                    polars.count().cast(polars.Float64),
+                    polars.len().alias("count").cast(polars.Float64),
                     polars.col(on).mean().cast(polars.Float64).alias("mean"),
                 ]
             )
