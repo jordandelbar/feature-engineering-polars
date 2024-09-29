@@ -130,3 +130,11 @@ dmypy.json
 
 # Ruff
 .ruff_cache
+
+# Jetbrains
+/.idea/.gitignore
+/.idea/feature-engineering-polars.iml
+/.idea/misc.xml
+/.idea/modules.xml
+/.idea/inspectionProfiles/profiles_settings.xml
+/.idea/vcs.xml
