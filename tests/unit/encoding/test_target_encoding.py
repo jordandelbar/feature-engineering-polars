@@ -127,7 +127,7 @@ def test_target_encoding_with_different_dtypes(caplog, standard_polars_dataframe
     assert transformed_int32.equals(transformed_int64)
     assert transformed_itself.equals(transformed_int64)
     assert (
-        "Feature ['Rain'] was mapped with dtype Int64 not Utf8, Int64 was enforced"
+        "Feature ['Rain'] was mapped with dtype Int64 not Int32, Int64 was enforced"
         in caplog.text
     )
 

@@ -48,18 +48,18 @@ readme = "README.md"
 packages = [{ include = "fe_polars" }]
 
 [tool.poetry.dependencies]
-python = "^3.8"
-polars = "^0.19.19"
+python = "^3.9"
+polars = "^1.8.2"
 
 [tool.poetry.group.dev.dependencies]
-ruff = "^0.0.259"
-black = "^23.1.0"
-pre-commit = { version = "^3.2.0", python = "^3.8" }
-mypy = "^1.1.1"
+ruff = "^0.6.8"
+black = "^24.8.0"
+pre-commit = { version = "^3.8.0", python = "^3.8" }
+mypy = "^1.11.2"
 
 [tool.poetry.group.test.dependencies]
-pytest = "^7.2.2"
-pytest-cov = "^4.0.0"
+pytest = "^8.3.3"
+pytest-cov = "^5.0.0"
 
 [build-system]
 requires = ["poetry-core"]
